@@ -10,7 +10,7 @@ local function wget(url, path)
 	return true
 end
 
-local base = "https://raw.github.com/MultHub/Aurora-apps/app-get/master/app-get"
+local base = "https://raw.github.com/MultHub/Aurora-apps/master/app-get"
 
 wget(base .. "/aInfo", "apps/app-get/aInfo")
 wget(base .. "/app-get", "apps/app-get/app-get")
