@@ -1,0 +1,5 @@
+{
+	sID = "app-get",
+	sName = "app-get",
+	sExecute = "app-get",
+}
