@@ -13,4 +13,5 @@ end
 local base = "https://raw.github.com/MultHub/Aurora-apps/master/app-get"
 
 wget(base .. "/aInfo", "apps/app-get/aInfo")
-wget(base .. "/app-get", "apps/app-get/app-get")
+wget(base .. "/app-get", ".aurora/app-get")
+wget(base .. "/launchgui", "apps/app-get/launchgui")
