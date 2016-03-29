@@ -118,7 +118,7 @@ function recursiveClear(x, y)
     for i, v in pairs(toClear) do
       local parts = {}
       for match in string.gmatch(i, "[^,]+") do
-        table.insert(parts, match)
+        table.insert(parts, tonumber(match))
       end
       set(parts[1], parts[2], "blank")
     end
