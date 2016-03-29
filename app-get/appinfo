@@ -1,0 +1,5 @@
+{
+  files = {"aInfo", "launchgui"},
+  name  = "app-get GUI",
+  desc  = "GUI for using app-get, genius",
+}

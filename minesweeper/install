@@ -1,0 +1,2 @@
+shell.run("lua-preproc main /apps/minesweeper/startgame")
+aUtil.doFile(".aurora/appbrowser", "minesweeper")

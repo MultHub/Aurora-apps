@@ -1,0 +1,187 @@
+-- basic stuff
+local grid
+local function refreshGrid(w, h)
+  grid = {}
+  for y = 1, h do
+    local tmp = {}
+    for x = 1, w do
+      table.insert(tmp, "unknown")
+    end
+    table.insert(grid, tmp)
+  end
+  setmetatable(grid, {__index = function()
+    return {}
+  end})
+end
+local function randomPos()
+  return math.random(1, #grid[1]), math.random(1, #grid)
+end
+local function get(x, y)
+  if y < 1 or y > #grid then
+    return nil
+  end
+  return grid[y][x]
+end
+local function set(x, y, t)
+  if y < 1 or y > #grid then
+    return
+  end
+  grid[y][x] = t
+end
+local function populateGrid(n)
+  for i = 1, n do
+    local x, y = randomPos()
+    while get(x, y) == "mine" do
+      x, y = randomPos()
+    end
+    set(x, y, "mine")
+  end
+end
+local function countMines(x, y)
+  local n = 0
+  if not x or not y then
+    for _y = 1, #grid do
+      for _x = 1, #grid[_y] do
+        if get(_x, _y) == "mine" or get(_x, _y) == "flagmine" then
+          n = n + 1
+        end
+      end
+    end
+  else
+    for _y = y - 1, y + 1 do
+      for _x = x - 1, x + 1 do
+        pcall(function()
+        if _x >= 1 and _x <= #grid[1]
+        and _y >= 1 and _y <= #grid
+        and (get(_x, _y) == "mine" or get(_x, _y) == "flagmine") then
+          n = n + 1
+        end
+        end)
+      end
+    end
+  end
+  return n
+end
+local function countFlags()
+  local n = 0
+  for y = 1, #grid do
+    for x = 1, #grid[1] do
+      if get(x, y) == "flagmine" or get(x, y) == "flag" then
+        n = n + 1
+      end
+    end
+  end
+  return n
+end
+local function countUnknown()
+  local n = 0
+  for y = 1, #grid do
+    for x = 1, #grid[1] do
+      if get(x, y) == "unknown" then
+        n = n + 1
+      end
+    end
+  end
+  return n
+end
+local recursiveClear
+function recursiveClear(x, y)
+  if not x or not y or y < 1 or y > #grid or x < 1 or x > #grid[1] then
+    return false
+  end
+  if get(x, y) == "flagmine" then
+    return false
+  elseif get(x, y) == "mine" then
+    return true
+  end
+  if get(x, y) == "unknown" then
+    set(x, y, "blank")
+    if countMines(x, y) < 1 then
+      for _y = y - 1, y + 1 do
+        for _x = x - 1, x + 1 do
+          if _x >= 1 and _x <= #grid[1]
+          and _y >= 1 and _y <= #grid then
+            recursiveClear(_x, _y)
+          end
+        end
+      end
+    end
+    return false
+  end
+  return false
+end
+local function toggleFlag(x, y)
+  if get(x, y) == "blank" then
+    return
+  elseif get(x, y) == "flag" then
+    set(x, y, "unknown")
+  elseif get(x, y) == "flagmine" then
+    set(x, y, "mine")
+  elseif get(x, y) == "unknown" then
+    set(x, y, "flag")
+  elseif get(x, y) == "mine" then
+    set(x, y, "flagmine")
+  end
+end
+local function gridTL()
+  local w, h = term.getSize()
+  return math.ceil(w / 2) - math.floor(#grid[1] / 2), math.ceil(h / 2) - math.floor(#grid / 2)
+end
+local numColors = {
+  [0] = colors.white,
+  [1] = colors.lightBlue,
+  [2] = colors.green,
+  [3] = colors.red,
+  [4] = colors.blue,
+  [5] = colors.brown,
+  [6] = colors.cyan,
+  [7] = colors.black,
+  [8] = colors.gray,
+}
+setmetatable(numColors, {__index = function()
+  return colors.white
+end})
+local function redrawGrid(dx, dy, full)
+  local ok, err = pcall(function()
+  for y = 1, #grid do
+    for x = 1, #grid[y] do
+      term.setCursorPos(dx + x - 1, dy + y - 1)
+      local t = get(x, y)
+      if t == "mine" and full then
+        if failX == x and failY == y then
+          term.setBackgroundColor(colors.red)
+        else
+          term.setBackgroundColor(colors.black)
+        end
+        term.setTextColor(colors.lightGray)
+        term.write("#")
+      elseif t == "flag" and full then
+        term.setBackgroundColor(colors.lightGray)
+        term.setTextColor(colors.black)
+        term.write("X")
+      elseif t == "unknown" or t == "mine" then
+        term.setBackgroundColor(colors.lightGray)
+        term.setTextColor(colors.gray)
+        term.write("L")
+      elseif t == "flagmine" or t == "flag" then
+        term.setBackgroundColor(colors.lightGray)
+        term.setTextColor(colors.red)
+        term.write("F")
+      elseif t == "blank" then
+        term.setBackgroundColor(colors.gray)
+        term.setTextColor(numColors[countMines(x, y)])
+        if countMines(x, y) < 1 then
+          term.write(" ")
+        else
+          term.write(tostring(countMines(x, y)))
+        end
+      end
+    end
+  end
+  end)
+  if not ok then
+    print("NO IT'S REDRAWGRID'S FAULT!")
+    print(err)
+    sleep(1)
+  end
+end

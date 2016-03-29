@@ -1,0 +1,5 @@
+{
+  files = {"aInfo", "grid", "render", "main"},
+  name  = "Minesweeper for Aurora",
+  desc  = "The classic Minesweeper game!\nwarning: recursion is crashy",
+}

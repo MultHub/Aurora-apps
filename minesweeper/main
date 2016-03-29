@@ -1,0 +1,76 @@
+-- horrible minesweeper clone
+-- something i can actually do now yay
+
+term.setTextColor(colors.black)
+term.setBackgroundColor(colors.white)
+term.clear()
+term.setCursorPos(2, 2)
+write("Width [9]:  ")
+local gridW = tonumber(read()) or 9
+term.setCursorPos(2, 3)
+write("Height [9]: ")
+local gridH = tonumber(read()) or 9
+term.setCursorPos(2, 5)
+write("Number of mines [10]: ")
+local nMines = tonumber(read()) or 10
+
+local win   = false
+local dead  = false
+local first = true
+
+local failX, failY = 0, 0
+
+--#include grid
+--#include render
+
+refreshGrid(gridW, gridH)
+populateGrid(nMines)
+local gx, gy = gridTL()
+while true do
+  local ok, err = pcall(redraw)
+  if not ok then
+    print("HOLY BANANAS REDRAW IS THE CRASH")
+    print(err)
+    sleep(1)
+  end
+  local ev = {os.pullEvent()}
+  if ev[1] == "key" then
+    if ev[2] == keys.q then
+      return
+    elseif ev[2] == keys.r then
+      win = false
+      dead = false
+      first = true
+      failX, failY = 0, 0
+      refreshGrid(gridW, gridH)
+      populateGrid(nMines)
+    end
+  elseif ev[1] == "mouse_click" and not (win or dead) then
+    local rx, ry = ev[3] - gx + 1, ev[4] - gy + 1
+    if ev[2] == 1 then
+      if recursiveClear(rx, ry) then
+        if first then
+          set(rx, ry, "unknown")
+          local mx, my = randomPos()
+          while get(mx, my) == "mine" do
+            mx, my = randomPos()
+          end
+          set(mx, my, "mine")
+          first = false
+          recursiveClear(rx, ry)
+        else
+          dead = true
+          failX, failY = rx, ry
+        end
+      else
+        first = false
+      end
+    elseif ev[2] == 2 then
+      toggleFlag(rx, ry)
+      first = false
+    end
+  end
+  if countUnknown() < 1 then
+    win = true
+  end
+end
