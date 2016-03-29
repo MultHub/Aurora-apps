@@ -95,16 +95,32 @@ function recursiveClear(x, y)
     return true
   end
   if get(x, y) == "unknown" then
-    set(x, y, "blank")
-    if countMines(x, y) < 1 then
-      for _y = y - 1, y + 1 do
-        for _x = x - 1, x + 1 do
-          if _x >= 1 and _x <= #grid[1]
-          and _y >= 1 and _y <= #grid then
-            recursiveClear(_x, _y)
+    local toClear = {}
+    toClear[x..","..y] = true
+    local keepSearching = countMines(x, y) < 1
+    while keepSearching do
+      keepSearching = false
+      for i, v in pairs(toClear) do
+        local parts = {}
+        for match in string.gmatch(i, "[^,]+") do
+          table.insert(parts, match)
+        end
+        for _y = y - 1, y + 1 do
+          for _x = x - 1, x + 1 do
+            if not toClear[_x..",".._y] and get(_x, _y) == "unknown" then
+              toClear[_x..",".._y] = true
+              keepSearching = true
+            end
           end
         end
       end
+    end
+    for i, v in pairs(toClear) do
+      local parts = {}
+      for match in string.gmatch(i, "[^,]+") do
+        table.insert(parts, match)
+      end
+      set(parts[1], parts[2], "blank")
     end
     return false
   end
