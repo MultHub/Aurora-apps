@@ -103,13 +103,15 @@ function recursiveClear(x, y)
       for i, v in pairs(toClear) do
         local parts = {}
         for match in string.gmatch(i, "[^,]+") do
-          table.insert(parts, match)
+          table.insert(parts, tonumber(match))
         end
-        for _y = y - 1, y + 1 do
-          for _x = x - 1, x + 1 do
-            if not toClear[_x..",".._y] and get(_x, _y) == "unknown" then
-              toClear[_x..",".._y] = true
-              keepSearching = true
+        if countMines(parts[1], parts[2]) < 1 then
+          for _y = parts[2] - 1, parts[2] + 1 do
+            for _x = parts[1] - 1, parts[1] + 1 do
+              if not toClear[_x..",".._y] and get(_x, _y) == "unknown" then
+                toClear[_x..",".._y] = true
+                keepSearching = true
+              end
             end
           end
         end
