@@ -1,0 +1,121 @@
+local repo = "https://raw.github.com/MultHub/Aurora-apps/master/"
+
+local function printUsage()
+  print("app-get")
+  print("  app-get update")
+  print("  app-get install <appid>")
+  print("  app-get remove <appid>")
+  print("  app-get list")
+end
+
+local function wget(url, path)
+  local r = http.get(url)
+  if not r then
+    return false
+  end
+  local c = r.readAll()
+  r.close()
+  if path then
+    local f = fs.open(path, "w")
+    f.write(c)
+    f.close()
+    return true
+  end
+  return c
+end
+
+local function update()
+  write("Updating package list... ")
+  local ok = wget(repo .. "apps.db", ".aurora/apps.db")
+  if not ok then
+    print("failed")
+  else
+    print("done")
+  end
+  return ok
+end
+
+local function install(appid)
+  write("Downloading appinfo... ")
+  local ok = wget(repo .. appid .. "/appinfo")
+  if not ok then
+    print("failed")
+    return false
+  end
+  print("done")
+  local appinfo = textutils.unserialize(ok)
+  for i, v in ipairs(appinfo.files) do
+    write("Downloading file \"" .. v .. "\"... ")
+    local ok = wget(repo .. appid .. "/" .. v, "apps/" .. appid .. "/" .. v)
+    if not ok then
+      print("failed")
+    else
+      print("done")
+    end
+  end
+  write("Downloading install script... ")
+  local ok = wget(repo .. appid .. "/install")
+  if not ok then
+    print("failed")
+  else
+    print("done")
+    write("Executing install script... ")
+    local oldDir = shell.dir()
+    shell.setDir("apps/" .. appid)
+    setfenv(loadstring(ok), getfenv())()
+    shell.setDir(oldDir)
+    print("done")
+  end
+  return true
+end
+
+local function remove(appid)
+  write("Removing " .. appid .. "... ")
+  local ok = pcall(fs.delete, fs.combine("apps", appid))
+  if not ok then
+    print("failed")
+  else
+    print("done")
+  end
+  return ok
+end
+
+local args = {...}
+
+if #args < 1 then
+  printUsage()
+  return false
+end
+
+local mode = args[1]
+if mode == "update" then
+  return update()
+elseif mode == "install" then
+  if #args < 2 then
+    printUsage()
+    return false
+  end
+  return install(args[2])
+elseif mode == "remove" then
+  if #args < 2 then
+    printUsage()
+    return false
+  end
+  return remove(args[2])
+elseif mode == "list" then
+  if not fs.exists(".aurora/apps.db") then
+    update()
+  end
+  local f = fs.open(".aurora/apps.db", "r")
+  if not f then
+    print("Error reading apps.db")
+    return false
+  end
+  local c = textutils.unserialize(f.readAll())
+  f.close()
+  table.sort(c)
+  for i, v in ipairs(c) do
+    print(v)
+  end
+  return c
+end
