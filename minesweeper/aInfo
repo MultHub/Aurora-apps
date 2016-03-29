@@ -1,0 +1,5 @@
+{
+  sID = "minesweeper",
+  sName = "CC Minesweeper",
+  sExecute = "startgame",
+}
