@@ -1,19 +1,23 @@
 local function redraw()
-  local gx, gy = gridTL()
-  local w,  h  = term.getSize()
-  term.setBackgroundColor(colors.white)
-  term.setTextColor(colors.black)
-  term.clear()
-  term.setCursorPos(1, 1)
-  term.setBackgroundColor(colors.lightGray)
-  term.clearLine()
-  if dead then
-    term.write("GAME OVER")
-  elseif win then
-    term.write("YOU WIN")
-  else
-    term.write("MINES: " .. (nMines - countFlags()))
-  end
-  term.write(" [Q: quit, R: restart]")
-  redrawGrid(gx, gy, dead or win)
+  term.current().setVisible(false)
+  pcall(function()
+    local gx, gy = gridTL()
+    local w,  h  = term.getSize()
+    term.setBackgroundColor(colors.white)
+    term.setTextColor(colors.black)
+    term.clear()
+    term.setCursorPos(1, 1)
+    term.setBackgroundColor(colors.lightGray)
+    term.clearLine()
+    if dead then
+      term.write("GAME OVER")
+    elseif win then
+      term.write("YOU WIN")
+    else
+      term.write("MINES: " .. (nMines - countFlags()))
+    end
+    term.write(" [Q: quit, R: restart]")
+    redrawGrid(gx, gy, dead or win)
+  end)
+  term.current().setVisible(true)
 end
