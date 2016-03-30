@@ -101,14 +101,11 @@ function recursiveClear(x, y)
     while keepSearching do
       keepSearching = false
       for i, v in pairs(toClear) do
-        local parts = {}
-        for match in string.gmatch(i, "[^,]+") do
-          table.insert(parts, tonumber(match))
-        end
+        local parts = {string.match(i, "(%d+),(%d+)")}
         if countMines(parts[1], parts[2]) < 1 then
           for _y = parts[2] - 1, parts[2] + 1 do
             for _x = parts[1] - 1, parts[1] + 1 do
-              if not toClear[_x..",".._y] and get(_x, _y) == "unknown" then
+              if not toClear[_x..",".._y] and get(tonumber(_x), tonumber(_y)) == "unknown" then
                 toClear[_x..",".._y] = true
                 keepSearching = true
               end
@@ -118,11 +115,8 @@ function recursiveClear(x, y)
       end
     end
     for i, v in pairs(toClear) do
-      local parts = {}
-      for match in string.gmatch(i, "[^,]+") do
-        table.insert(parts, tonumber(match))
-      end
-      set(parts[1], parts[2], "blank")
+      local parts = {string.match(i, "(%d+),(%d+)")}
+      set(tonumber(parts[1]), tonumber(parts[2]), "blank")
     end
     return false
   end
