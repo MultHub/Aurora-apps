@@ -27,12 +27,7 @@ refreshGrid(gridW, gridH)
 populateGrid(nMines)
 local gx, gy = gridTL()
 while true do
-  local ok, err = pcall(redraw)
-  if not ok then
-    print("HOLY BANANAS REDRAW IS THE CRASH")
-    print(err)
-    sleep(1)
-  end
+  redraw()
   local ev = {os.pullEvent()}
   if ev[1] == "key" then
     if ev[2] == keys.q then
