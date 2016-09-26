@@ -1,4 +1,4 @@
-### moved to https://gitgud.io/RandomTrees/Aurora
+### <del>moved to https://gitgud.io/RandomTrees/Aurora</del>
 
 Aurora-apps
 ===========
